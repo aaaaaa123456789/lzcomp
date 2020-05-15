@@ -3,13 +3,18 @@
 #include <string.h>
 #include <stdarg.h>
 
-#define COMPRESSION_METHODS 72
+#define COMPRESSION_METHODS 73 /* sum of all values for the methods field in compressors */
 #define MAX_FILE_SIZE 32768
 
 struct command {
   unsigned command: 3;
   unsigned count:  12;
   signed value:    17;
+};
+
+struct compressor {
+  unsigned methods;
+  struct command * (* function) (const unsigned char *, const unsigned char *, unsigned short *, unsigned);
 };
 
 struct options {
@@ -20,7 +25,9 @@ struct options {
 
 // compress.c
 struct command * compress(const unsigned char *, unsigned short *);
-struct command * store_uncompressed(unsigned short *);
+
+// global.c
+extern const struct compressor compressors[];
 
 // main.c
 int main(int, char **);
@@ -30,6 +37,9 @@ unsigned char * read_file_into_buffer(const char *, unsigned short *);
 // merging.c
 struct command * select_command_sequence(struct command **, const unsigned short *, unsigned, unsigned short *);
 struct command * merge_command_sequences(const struct command *, unsigned short, const struct command *, unsigned short, unsigned short *);
+
+// nullcomp.c
+struct command * store_uncompressed(const unsigned char *, const unsigned char *, unsigned short *, unsigned);
 
 // options.c
 struct options get_options(int, char **);
