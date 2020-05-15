@@ -15,10 +15,9 @@ struct command * try_compress (const unsigned char * data, const unsigned char *
     else
       *current_command = pick_best_command(2, copy, repetition);
     *current_command = pick_best_command(2, (struct command) {.command = 0, .count = 1, .value = position}, *current_command);
-    if (flags & 2) {
+    if (flags & 2)
       if (previous_data && (previous_data != 32) && (previous_data != 1024) && (command_size(*current_command) == current_command -> count))
         *current_command = (struct command) {.command = 0, .count = 1, .value = position};
-    }
     if (lookahead_flag) {
       if (lookahead >= lookahead_flag)
         lookahead = 0;
