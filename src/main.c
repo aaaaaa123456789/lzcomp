@@ -26,11 +26,11 @@ void error_exit (int error_code, const char * error, ...) {
 unsigned char * read_file_into_buffer (const char * file, unsigned short * size) {
   FILE * fp = fopen(file, "rb");
   if (!fp) error_exit(1, "could not open file %s for reading", file);
-  unsigned char * buf = malloc(32769);
-  int rv = fread(buf, 1, 32769, fp);
+  unsigned char * buf = malloc(MAX_FILE_SIZE + 1);
+  int rv = fread(buf, 1, MAX_FILE_SIZE + 1, fp);
   fclose(fp);
   if (rv < 0) error_exit(1, "could not read from file %s", file);
-  if (rv > 32768) error_exit(1, "file %s is too big", file);
+  if (rv > MAX_FILE_SIZE) error_exit(1, "file %s is too big", file);
   *size = rv;
   return buf;
 }

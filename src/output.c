@@ -23,7 +23,7 @@ void write_command_to_textfile (FILE * fp, struct command command, const unsigne
       rv = fprintf(fp, "\tlzrepeat %u, $%02hhx\n", command.count, (unsigned char) command.value);
       break;
     case 2:
-      if ((command.value < 0) || (command.value > 65535)) error_exit(2, "invalid command in output stream");
+      if (command.value < 0) error_exit(2, "invalid command in output stream");
       rv = fprintf(fp, "\tlzrepeat %u, $%02hhx, $%02hhx\n", command.count, (unsigned char) command.value, (unsigned char) (command.value >> 8));
       break;
     case 3:
@@ -38,7 +38,7 @@ void write_command_to_textfile (FILE * fp, struct command command, const unsigne
     case 6:
       kind = "reversed";
     copy:
-      if ((command.value < -128) || (command.value > 32767)) error_exit(2, "invalid command in output stream");
+      if ((command.value < -128) || (command.value >= MAX_FILE_SIZE)) error_exit(2, "invalid command in output stream");
       if (command.value < 0)
         rv = fprintf(fp, "\tlzcopy %s, %u, %d\n", kind, command.count, command.value);
       else
@@ -78,7 +78,7 @@ void write_command_to_file (FILE * fp, struct command command, const unsigned ch
     case 0: case 3:
       break;
     default:
-      if ((command.value < -128) || (command.value > 32767)) error_exit(2, "invalid command in output stream");
+      if ((command.value < -128) || (command.value >= MAX_FILE_SIZE)) error_exit(2, "invalid command in output stream");
       if (command.value < 0)
         *(pos ++) = command.value ^ 127;
       else {

@@ -4,6 +4,7 @@
 #include <stdarg.h>
 
 #define COMPRESSION_METHODS 72
+#define MAX_FILE_SIZE 32768
 
 struct command {
   unsigned command: 3;
