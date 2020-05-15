@@ -14,23 +14,20 @@ int main (int argc, char ** argv) {
   return 0;
 }
 
-void error_exit (int error_code, const char * error, ...) {
-  va_list ap;
-  va_start(ap, error);
-  fputs("error: ", stderr);
-  vfprintf(stderr, error, ap);
-  fputc('\n', stderr);
-  exit(error_code);
-}
-
-unsigned char * read_file_into_buffer (const char * file, unsigned short * size) {
-  FILE * fp = fopen(file, "rb");
-  if (!fp) error_exit(1, "could not open file %s for reading", file);
-  unsigned char * buf = malloc(MAX_FILE_SIZE + 1);
-  int rv = fread(buf, 1, MAX_FILE_SIZE + 1, fp);
-  fclose(fp);
-  if (rv < 0) error_exit(1, "could not read from file %s", file);
-  if (rv > MAX_FILE_SIZE) error_exit(1, "file %s is too big", file);
-  *size = rv;
-  return buf;
+struct command * compress (const unsigned char * data, unsigned short * size) {
+  unsigned char * bitflipped = malloc(*size);
+  bit_flip(data, *size, bitflipped);
+  struct command * compressed_sequences[COMPRESSION_METHODS];
+  unsigned short lengths[COMPRESSION_METHODS];
+  const struct compressor * compressor = compressors;
+  unsigned current, flags = compressor -> methods;
+  for (current = 0; current < COMPRESSION_METHODS; current ++) {
+    lengths[current] = *size;
+    if (!flags) flags = (++ compressor) -> methods;
+    compressed_sequences[current] = compressor -> function(data, bitflipped, lengths + current, -- flags);
+  }
+  free(bitflipped);
+  struct command * result = select_command_sequence(compressed_sequences, lengths, COMPRESSION_METHODS, size);
+  for (current = 0; current < COMPRESSION_METHODS; current ++) free(compressed_sequences[current]);
+  return result;
 }

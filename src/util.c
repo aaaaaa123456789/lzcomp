@@ -1,5 +1,26 @@
 #include "proto.h"
 
+void error_exit (int error_code, const char * error, ...) {
+  va_list ap;
+  va_start(ap, error);
+  fputs("error: ", stderr);
+  vfprintf(stderr, error, ap);
+  fputc('\n', stderr);
+  exit(error_code);
+}
+
+unsigned char * read_file_into_buffer (const char * file, unsigned short * size) {
+  FILE * fp = fopen(file, "rb");
+  if (!fp) error_exit(1, "could not open file %s for reading", file);
+  unsigned char * buf = malloc(MAX_FILE_SIZE + 1);
+  int rv = fread(buf, 1, MAX_FILE_SIZE + 1, fp);
+  fclose(fp);
+  if (rv < 0) error_exit(1, "could not read from file %s", file);
+  if (rv > MAX_FILE_SIZE) error_exit(1, "file %s is too big", file);
+  *size = rv;
+  return buf;
+}
+
 void bit_flip (const unsigned char * data, unsigned short length, unsigned char * result) {
   unsigned char new_value, pos;
   while (length --) {

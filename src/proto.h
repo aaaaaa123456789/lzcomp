@@ -23,16 +23,12 @@ struct options {
   unsigned char mode;
 };
 
-// compress.c
-struct command * compress(const unsigned char *, unsigned short *);
-
 // global.c
 extern const struct compressor compressors[];
 
 // main.c
 int main(int, char **);
-void error_exit(int, const char *, ...);
-unsigned char * read_file_into_buffer(const char *, unsigned short *);
+struct command * compress(const unsigned char *, unsigned short *);
 
 // merging.c
 struct command * select_command_sequence(struct command **, const unsigned short *, unsigned, unsigned short *);
@@ -63,6 +59,8 @@ unsigned short scan_backwards(const unsigned char *, unsigned short, unsigned sh
 struct command find_best_repetition(const unsigned char *, unsigned short, unsigned short);
 
 // util.c
+void error_exit(int, const char *, ...);
+unsigned char * read_file_into_buffer(const char *, unsigned short *);
 void bit_flip(const unsigned char *, unsigned short, unsigned char *);
 struct command pick_best_command(unsigned, struct command, ...);
 int is_better(struct command, struct command);
