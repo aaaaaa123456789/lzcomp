@@ -5,6 +5,7 @@ void error_exit (int error_code, const char * error, ...) {
   va_start(ap, error);
   fputs("error: ", stderr);
   vfprintf(stderr, error, ap);
+  va_end(ap);
   fputc('\n', stderr);
   exit(error_code);
 }
