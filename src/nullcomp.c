@@ -6,7 +6,7 @@ struct command * store_uncompressed (const unsigned char * data, const unsigned 
   *size = 0;
   for (position = 0; remainder; position += block, remainder -= block) {
     block = (remainder > 1024) ? 1024 : remainder;
-    if ((block <= 64) && (block > 32)) block = 32;
+    if (!(flags & 1) && (block <= 64) && (block > 32)) block = 32;
     result = realloc(result, sizeof(struct command) * (1 + *size));
     result[(*size) ++] = (struct command) {.command = 0, .count = block, .value = position};
   }

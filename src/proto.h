@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-#define COMPRESSION_METHODS 73 /* sum of all values for the methods field in compressors */
+#define COMPRESSION_METHODS 74 /* sum of all values for the methods field in compressors */
 #define MAX_FILE_SIZE 32768
 
 struct command {
