@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-#define COMPRESSION_METHODS 74 /* sum of all values for the methods field in compressors */
+#define COMPRESSION_METHODS 80 /* sum of all values for the methods field in compressors */
 #define MAX_FILE_SIZE 32768
 
 struct command {
@@ -54,6 +54,10 @@ void write_command_to_file(FILE *, struct command, const unsigned char *);
 // packing.c
 void optimize(struct command *, unsigned short);
 void repack(struct command **, unsigned short *);
+
+// repcomp.c
+struct command * try_compress_repetitions(const unsigned char *, const unsigned char *, unsigned short *, unsigned);
+struct command find_repetition_at_position(const unsigned char *, unsigned short, unsigned short);
 
 // srchcomp.c
 struct command * try_compress(const unsigned char *, const unsigned char *, unsigned short *, unsigned);
