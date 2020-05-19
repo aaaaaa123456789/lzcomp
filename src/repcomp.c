@@ -23,8 +23,8 @@ struct command * try_compress_repetitions (const unsigned char * data, const uns
       pos += candidate.count;
     } else {
       pos ++;
-      if ((++ skipped) == 1024) {
-        *(current ++) = (struct command) {.command = 0, .count = 1024, .value = pos - 1024};
+      if ((++ skipped) == MAX_COMMAND_COUNT) {
+        *(current ++) = (struct command) {.command = 0, .count = MAX_COMMAND_COUNT, .value = pos - MAX_COMMAND_COUNT};
         skipped = 0;
       }
     }
@@ -39,7 +39,7 @@ struct command find_repetition_at_position (const unsigned char * data, unsigned
   if ((position + 1) >= length) return data[position] ? ((struct command) {.command = 7}) : ((struct command) {.command = 3, .count = 1});
   unsigned char value[2] = {data[position], data[position + 1]};
   unsigned repcount, limit = length - position;
-  if (limit > 1024) limit = 1024;
+  if (limit > MAX_COMMAND_COUNT) limit = MAX_COMMAND_COUNT;
   for (repcount = 2; (repcount < limit) && (data[position + repcount] == value[repcount & 1]); repcount ++);
   struct command result;
   result.count = repcount;

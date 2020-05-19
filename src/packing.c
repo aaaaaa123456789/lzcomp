@@ -10,8 +10,8 @@ void optimize (struct command * commands, unsigned short count) {
     if (
         !(commands -> command) &&
         (command_size(*next) == next -> count) &&
-        ((commands -> count + next -> count) <= 1024) &&
-        ((commands -> count > 32) || ((commands -> count + next -> count) <= 32))
+        ((commands -> count + next -> count) <= MAX_COMMAND_COUNT) &&
+        ((commands -> count > SHORT_COMMAND_COUNT) || ((commands -> count + next -> count) <= SHORT_COMMAND_COUNT))
        ) {
       commands -> count += next -> count;
       next -> command = 7;
@@ -23,22 +23,22 @@ void optimize (struct command * commands, unsigned short count) {
         if ((commands -> value + commands -> count) != next -> value) break;
         commands -> count += next -> count;
         next -> command = 7;
-        if (commands -> count <= 1024) goto skip;
+        if (commands -> count <= MAX_COMMAND_COUNT) goto skip;
         next -> command = 0;
-        next -> value = commands -> value + 1024;
-        next -> count = commands -> count - 1024;
-        commands -> count = 1024;
+        next -> value = commands -> value + MAX_COMMAND_COUNT;
+        next -> count = commands -> count - MAX_COMMAND_COUNT;
+        commands -> count = MAX_COMMAND_COUNT;
         break;
       case 1:
         if (commands -> value != next -> value) break;
       case 3:
-        if ((commands -> count + next -> count) <= 1024) {
+        if ((commands -> count + next -> count) <= MAX_COMMAND_COUNT) {
           commands -> count += next -> count;
           next -> command = 7;
           goto skip;
         }
-        next -> count = (commands -> count + next -> count) - 1024;
-        commands -> count = 1024;
+        next -> count = (commands -> count + next -> count) - MAX_COMMAND_COUNT;
+        commands -> count = MAX_COMMAND_COUNT;
         break;
     }
     accept:

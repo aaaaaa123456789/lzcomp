@@ -9,9 +9,9 @@ struct command * try_compress_multi_pass (const unsigned char * data, const unsi
     reversed[pos] = data[*size - 1 - pos];
     sources[pos] = -1;
   }
-  for (pos = (flags & 1); pos < *size; pos += (result[pos].count >= 64) ? result[pos].count : 1) {
+  for (pos = (flags & 1); pos < *size; pos += (result[pos].count >= MULTIPASS_SKIP_THRESHOLD) ? result[pos].count : 1) {
     result[pos] = pick_command_for_position(data, flipped, reversed, sources, *size, pos, flags);
-    if ((result[pos].command >= 4) || (result[pos].count < 64)) sources[current ++] = pos;
+    if ((result[pos].command >= 4) || (result[pos].count < MULTIPASS_SKIP_THRESHOLD)) sources[current ++] = pos;
   }
   free(reversed);
   free(sources);
@@ -24,14 +24,14 @@ struct command * try_compress_multi_pass (const unsigned char * data, const unsi
   }
   for (pos = 0; pos < *size; pos ++)
     if (!result[pos].command) {
-      for (current = 1; (current < 1024) && ((pos + current) < *size); current ++) if (result[pos + current].command) break;
+      for (current = 1; (current < MAX_COMMAND_COUNT) && ((pos + current) < *size); current ++) if (result[pos + current].command) break;
       result[pos] = (struct command) {.command = 0, .count = current, .value = pos};
-    } else if (result[pos].count > 1024) {
-      result[pos + 1024] = result[pos];
-      result[pos + 1024].count -= 1024;
-      if ((result[pos + 1024].command >= 4) && (result[pos + 1024].value >= 0))
-        result[pos + 1024].value += (result[pos].command == 6) ? -1024 : 1024;
-      result[pos].count = 1024;
+    } else if (result[pos].count > MAX_COMMAND_COUNT) {
+      result[pos + MAX_COMMAND_COUNT] = result[pos];
+      result[pos + MAX_COMMAND_COUNT].count -= MAX_COMMAND_COUNT;
+      if ((result[pos + MAX_COMMAND_COUNT].command >= 4) && (result[pos + MAX_COMMAND_COUNT].value >= 0))
+        result[pos + MAX_COMMAND_COUNT].value += (result[pos].command == 6) ? -MAX_COMMAND_COUNT : MAX_COMMAND_COUNT;
+      result[pos].count = MAX_COMMAND_COUNT;
     }
   for (next = pos = 0; pos < *size; pos ++)
     if (pos == next)
@@ -45,14 +45,14 @@ struct command * try_compress_multi_pass (const unsigned char * data, const unsi
 struct command pick_command_for_position (const unsigned char * data, const unsigned char * flipped, const unsigned char * reversed,
                                           const short * sources, unsigned short length, unsigned short position, unsigned flags) {
   struct command result = pick_repetition_for_position(data, length, position, flags);
-  if (result.count >= 64) return result;
+  if (result.count >= MULTIPASS_SKIP_THRESHOLD) return result;
   unsigned char p;
   for (p = 0; p < 3; p ++) {
     struct command temp = pick_copy_for_position(data, p[(const unsigned char * []) {data, flipped, reversed}], sources, p + 4, length, position, flags);
     if (temp.command == 7) continue;
     if (temp.count > result.count) result = temp;
   }
-  if ((result.command >= 4) && (result.value >= (position - 128))) result.value -= position;
+  if ((result.command >= 4) && (result.value >= (position - LOOKBACK_LIMIT))) result.value -= position;
   return result;
 }
 

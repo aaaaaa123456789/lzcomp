@@ -3,9 +3,13 @@
 #include <string.h>
 #include <stdarg.h>
 
-#define COMPRESSION_METHODS 96 /* sum of all values for the methods field in compressors */
-#define MAX_FILE_SIZE 32768
-#define LOOKAHEAD_LIMIT 3072
+#define COMPRESSION_METHODS         96 /* sum of all values for the methods field in compressors */
+#define MAX_FILE_SIZE            32768
+#define SHORT_COMMAND_COUNT         32
+#define MAX_COMMAND_COUNT         1024
+#define LOOKBACK_LIMIT             128 /* highest negative valid count for a copy command */
+#define LOOKAHEAD_LIMIT           3072 /* maximum lookahead distance for the first pass of multi-pass compression */
+#define MULTIPASS_SKIP_THRESHOLD    64
 
 struct command {
   unsigned command: 3;

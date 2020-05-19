@@ -15,8 +15,8 @@ struct command * try_compress (const unsigned char * data, const unsigned char *
     else
       *current_command = pick_best_command(2, copy, repetition);
     *current_command = pick_best_command(2, (struct command) {.command = 0, .count = 1, .value = position}, *current_command);
-    if (flags & 2)
-      if (previous_data && (previous_data != 32) && (previous_data != 1024) && (command_size(*current_command) == current_command -> count))
+    if ((flags & 2) && (command_size(*current_command) == current_command -> count))
+      if (previous_data && (previous_data != SHORT_COMMAND_COUNT) && (previous_data != MAX_COMMAND_COUNT))
         *current_command = (struct command) {.command = 0, .count = 1, .value = position};
     if (lookahead_flag) {
       if (lookahead >= lookahead_flag)
@@ -53,7 +53,7 @@ struct command find_best_copy (const unsigned char * data, unsigned short positi
     case 1: command = pick_best_command(3, backwards, flipped, simple); break;
     case 2: command = pick_best_command(3, flipped, backwards, simple);
   }
-  if ((flags & 4) && (command.count > 32)) command.count = 32;
+  if ((flags & 4) && (command.count > SHORT_COMMAND_COUNT)) command.count = SHORT_COMMAND_COUNT;
   return command;
 }
 
@@ -64,13 +64,13 @@ unsigned short scan_forwards (const unsigned char * target, unsigned short limit
   for (position = 0; position < real_position; position ++) {
     if (source[position] != *target) continue;
     for (current_length = 0; (current_length < limit) && (source[position + current_length] == target[current_length]); current_length ++);
-    if (current_length > 1024) current_length = 1024;
+    if (current_length > MAX_COMMAND_COUNT) current_length = MAX_COMMAND_COUNT;
     if (current_length < best_length) continue;
     best_match = position;
     best_length = current_length;
   }
   if (!best_length) return 0;
-  if ((best_match + 128) >= real_position)
+  if ((best_match + LOOKBACK_LIMIT) >= real_position)
     *offset = best_match - real_position;
   else
     *offset = best_match;
@@ -86,13 +86,13 @@ unsigned short scan_backwards (const unsigned char * data, unsigned short limit,
     if (data[position] != data[real_position]) continue;
     for (current_length = 0; (current_length <= position) && (current_length < limit) &&
                              (data[position - current_length] == data[real_position + current_length]); current_length ++);
-    if (current_length > 1024) current_length = 1024;
+    if (current_length > MAX_COMMAND_COUNT) current_length = MAX_COMMAND_COUNT;
     if (current_length < best_length) continue;
     best_match = position;
     best_length = current_length;
   }
   if (!best_length) return 0;
-  if ((best_match + 128) >= real_position)
+  if ((best_match + LOOKBACK_LIMIT) >= real_position)
     *offset = best_match - real_position;
   else
     *offset = best_match;
@@ -103,7 +103,7 @@ struct command find_best_repetition (const unsigned char * data, unsigned short 
   if ((position + 1) >= length) return data[position] ? ((struct command) {.command = 7}) : ((struct command) {.command = 3, .count = 1});
   unsigned char value[2] = {data[position], data[position + 1]};
   unsigned repcount, limit = length - position;
-  if (limit > 1024) limit = 1024;
+  if (limit > MAX_COMMAND_COUNT) limit = MAX_COMMAND_COUNT;
   for (repcount = 2; (repcount < limit) && (data[position + repcount] == value[repcount & 1]); repcount ++);
   struct command result;
   result.count = repcount;

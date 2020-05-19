@@ -21,7 +21,7 @@ void write_commands_to_textfile (const char * file, const struct command * comma
 }
 
 void write_command_to_textfile (FILE * fp, struct command command, const unsigned char * input_stream) {
-  if ((!command.count) || (command.count > 1024)) error_exit(2, "invalid command in output stream");
+  if ((!command.count) || (command.count > MAX_COMMAND_COUNT)) error_exit(2, "invalid command in output stream");
   int rv, pos;
   const char * kind;
   switch (command.command) {
@@ -50,7 +50,7 @@ void write_command_to_textfile (FILE * fp, struct command command, const unsigne
     case 6:
       kind = "reversed";
     copy:
-      if ((command.value < -128) || (command.value >= MAX_FILE_SIZE)) error_exit(2, "invalid command in output stream");
+      if ((command.value < -LOOKBACK_LIMIT) || (command.value >= MAX_FILE_SIZE)) error_exit(2, "invalid command in output stream");
       if (command.value < 0)
         rv = fprintf(fp, "\tlzcopy %s, %u, %d\n", kind, command.count, command.value);
       else
@@ -77,12 +77,12 @@ void write_commands_to_file (const char * file, const struct command * commands,
 }
 
 void write_command_to_file (FILE * fp, struct command command, const unsigned char * input_stream) {
-  if ((!command.count) || (command.count > 1024)) error_exit(2, "invalid command in output stream");
+  if ((!command.count) || (command.count > MAX_COMMAND_COUNT)) error_exit(2, "invalid command in output stream");
   unsigned char buf[4];
   unsigned char * pos = buf;
   int n;
   command.count --;
-  if (command.count < 32)
+  if (command.count < SHORT_COMMAND_COUNT)
     *(pos ++) = (command.command << 5) + command.count;
   else {
     *(pos ++) = 224 + (command.command << 2) + (command.count >> 8);
@@ -95,7 +95,7 @@ void write_command_to_file (FILE * fp, struct command command, const unsigned ch
     case 0: case 3:
       break;
     default:
-      if ((command.value < -128) || (command.value >= MAX_FILE_SIZE)) error_exit(2, "invalid command in output stream");
+      if ((command.value < -LOOKBACK_LIMIT) || (command.value >= MAX_FILE_SIZE)) error_exit(2, "invalid command in output stream");
       if (command.value < 0)
         *(pos ++) = command.value ^ 127;
       else {
