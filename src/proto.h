@@ -71,7 +71,7 @@ void repack(struct command **, unsigned short *);
 struct command * try_compress_repetitions(const unsigned char *, const unsigned char *, unsigned short *, unsigned);
 struct command find_repetition_at_position(const unsigned char *, unsigned short, unsigned short);
 
-// srchcomp.c
+// spcomp.c
 struct command * try_compress(const unsigned char *, const unsigned char *, unsigned short *, unsigned);
 struct command find_best_copy(const unsigned char *, unsigned short, unsigned short, const unsigned char *, unsigned);
 unsigned short scan_forwards(const unsigned char *, unsigned short, const unsigned char *, unsigned short, short *);
