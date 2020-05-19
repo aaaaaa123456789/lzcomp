@@ -44,10 +44,10 @@ struct command * merge_command_sequences(const struct command *, unsigned short,
 
 // mpcomp.c
 struct command * try_compress_multi_pass(const unsigned char *, const unsigned char *, unsigned short *, unsigned);
-struct command pick_command_for_position(const unsigned char *, const unsigned char *, const unsigned char *, const short *, unsigned short,
-                                         unsigned short, unsigned);
-struct command pick_repetition_for_position(const unsigned char *, unsigned short, unsigned short, unsigned);
-struct command pick_copy_for_position(const unsigned char *, const unsigned char *, const short *, unsigned char, unsigned short, unsigned short, unsigned);
+struct command pick_command_for_pass(const unsigned char *, const unsigned char *, const unsigned char *, const short *, unsigned short,
+                                     unsigned short, unsigned);
+struct command pick_repetition_for_pass(const unsigned char *, unsigned short, unsigned short, unsigned);
+struct command pick_copy_for_pass(const unsigned char *, const unsigned char *, const short *, unsigned char, unsigned short, unsigned short, unsigned);
 
 // nullcomp.c
 struct command * store_uncompressed(const unsigned char *, const unsigned char *, unsigned short *, unsigned);
@@ -72,7 +72,7 @@ struct command * try_compress_repetitions(const unsigned char *, const unsigned 
 struct command find_repetition_at_position(const unsigned char *, unsigned short, unsigned short);
 
 // spcomp.c
-struct command * try_compress(const unsigned char *, const unsigned char *, unsigned short *, unsigned);
+struct command * try_compress_single_pass(const unsigned char *, const unsigned char *, unsigned short *, unsigned);
 struct command find_best_copy(const unsigned char *, unsigned short, unsigned short, const unsigned char *, unsigned);
 unsigned short scan_forwards(const unsigned char *, unsigned short, const unsigned char *, unsigned short, short *);
 unsigned short scan_backwards(const unsigned char *, unsigned short, unsigned short, short *);

@@ -10,7 +10,7 @@ struct command * try_compress_multi_pass (const unsigned char * data, const unsi
     sources[pos] = -1;
   }
   for (pos = (flags & 1); pos < *size; pos += (result[pos].count >= MULTIPASS_SKIP_THRESHOLD) ? result[pos].count : 1) {
-    result[pos] = pick_command_for_position(data, flipped, reversed, sources, *size, pos, flags);
+    result[pos] = pick_command_for_pass(data, flipped, reversed, sources, *size, pos, flags);
     if ((result[pos].command >= 4) || (result[pos].count < MULTIPASS_SKIP_THRESHOLD)) sources[current ++] = pos;
   }
   free(reversed);
@@ -42,13 +42,13 @@ struct command * try_compress_multi_pass (const unsigned char * data, const unsi
   return result;
 }
 
-struct command pick_command_for_position (const unsigned char * data, const unsigned char * flipped, const unsigned char * reversed,
-                                          const short * sources, unsigned short length, unsigned short position, unsigned flags) {
-  struct command result = pick_repetition_for_position(data, length, position, flags);
+struct command pick_command_for_pass (const unsigned char * data, const unsigned char * flipped, const unsigned char * reversed, const short * sources,
+                                      unsigned short length, unsigned short position, unsigned flags) {
+  struct command result = pick_repetition_for_pass(data, length, position, flags);
   if (result.count >= MULTIPASS_SKIP_THRESHOLD) return result;
   unsigned char p;
   for (p = 0; p < 3; p ++) {
-    struct command temp = pick_copy_for_position(data, p[(const unsigned char * []) {data, flipped, reversed}], sources, p + 4, length, position, flags);
+    struct command temp = pick_copy_for_pass(data, p[(const unsigned char * []) {data, flipped, reversed}], sources, p + 4, length, position, flags);
     if (temp.command == 7) continue;
     if (temp.count > result.count) result = temp;
   }
@@ -56,7 +56,7 @@ struct command pick_command_for_position (const unsigned char * data, const unsi
   return result;
 }
 
-struct command pick_repetition_for_position (const unsigned char * data, unsigned short length, unsigned short position, unsigned flags) {
+struct command pick_repetition_for_pass (const unsigned char * data, unsigned short length, unsigned short position, unsigned flags) {
   unsigned short p;
   if (data[position]) {
     if ((position + 1) >= length) return (struct command) {.command = 1, .count = 1, .value = data[position]};
@@ -74,8 +74,8 @@ struct command pick_repetition_for_position (const unsigned char * data, unsigne
   }
 }
 
-struct command pick_copy_for_position (const unsigned char * data, const unsigned char * reference, const short * sources,
-                                       unsigned char command_type, unsigned short length, unsigned short position, unsigned flags) {
+struct command pick_copy_for_pass (const unsigned char * data, const unsigned char * reference, const short * sources, unsigned char command_type,
+                                   unsigned short length, unsigned short position, unsigned flags) {
   struct command result = {.command = 7, .count = (flags & 4) ? 4 : 3};
   if (length < 3) return result;
   unsigned refpos, count;

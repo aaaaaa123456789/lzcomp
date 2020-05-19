@@ -1,6 +1,6 @@
 #include "proto.h"
 
-struct command * try_compress (const unsigned char * data, const unsigned char * bitflipped, unsigned short * length, unsigned flags) {
+struct command * try_compress_single_pass (const unsigned char * data, const unsigned char * bitflipped, unsigned short * length, unsigned flags) {
   struct command * commands = malloc(sizeof(struct command) * *length);
   memset(commands, -1, sizeof(struct command) * *length);
   struct command * current_command = commands;
