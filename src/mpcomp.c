@@ -1,5 +1,17 @@
 #include "proto.h"
 
+/*
+   Multi-pass compressor: performs an initial pass generating a single command for each byte position in the data and
+                          refines the command stream further in subsequent passes.
+   Methods defined: 16
+   Flags values: the flags are a bitfield; each bit triggers some alternate behavior if set:
+     1: always emit a literal command (0) for the first byte of the file
+     2: when reducing a two-byte repetition (2) command in the overlap elimination pass, reduce it to contain a whole
+        number of repetitions (i.e., an even count)
+     4: don't emit copy commands (4, 5, 6) with a count of 3
+     8: don't emit single-byte repetition (1) commands
+*/
+
 struct command * try_compress_multi_pass (const unsigned char * data, const unsigned char * flipped, unsigned short * size, unsigned flags) {
   struct command * result = calloc(*size, sizeof(struct command));
   unsigned char * reversed = malloc(*size);

@@ -1,5 +1,12 @@
 #include "proto.h"
 
+/*
+   Repetitions compressor: compresses the data only using a subset of the available repetition commands.
+   Methods defined: 6
+   Flags values: the value plus one is taken as a bitfield indicating which kinds of repetition commands are used
+                 (lowest bit to highest: repeat single byte (1), repeat two bytes (2), repeat zeros (3)).
+*/
+
 struct command * try_compress_repetitions (const unsigned char * data, const unsigned char * bitflipped, unsigned short * size, unsigned flags) {
   unsigned short pos = 0, skipped = 0;
   struct command * result = malloc(*size * sizeof(struct command));

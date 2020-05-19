@@ -1,11 +1,32 @@
 #include "proto.h"
 
+/*
+   Single-pass compressor: attempts to compress the data in a single pass, selecting the best command at each
+                           position within some constraints.
+   Methods defined: 72
+   Flags values:
+     Bit fields (will trigger alternate behavior if set):
+     1: prefer repetition commands over copy commands of equal count
+     2: don't emit a copy or repetition with a count equal to its size when the previous command is a literal (0) that
+        is not at maximum size (32 or 1024)
+     4: don't emit long copy commands
+     Selector values (pick one from each group and add them to the bit fields):
+     - Scan delay: number of bytes that are forced into literal (0) commands after each non-literal command:
+       0: 0 bytes
+       8: 1 byte
+       16: 2 bytes
+     - Copy command preference (when the command counts are tied), in order from most to least:
+       0: normal (4), reversed (6), flipped (5)
+       24: reversed (6), flipped (5), normal (4)
+       48: flipped (5), reversed (6), normal (4)
+*/
+
 struct command * try_compress_single_pass (const unsigned char * data, const unsigned char * bitflipped, unsigned short * length, unsigned flags) {
   struct command * commands = malloc(sizeof(struct command) * *length);
   memset(commands, -1, sizeof(struct command) * *length);
   struct command * current_command = commands;
   unsigned short position = 0, previous_data = 0;
-  unsigned char lookahead = 0, lookahead_flag = (flags >> 3) % 3;
+  unsigned char scan_delay = 0, scan_delay_flag = (flags >> 3) % 3;
   struct command copy, repetition;
   while (position < *length) {
     copy = find_best_copy(data, position, *length, bitflipped, flags);
@@ -18,11 +39,11 @@ struct command * try_compress_single_pass (const unsigned char * data, const uns
     if ((flags & 2) && (command_size(*current_command) == current_command -> count))
       if (previous_data && (previous_data != SHORT_COMMAND_COUNT) && (previous_data != MAX_COMMAND_COUNT))
         *current_command = (struct command) {.command = 0, .count = 1, .value = position};
-    if (lookahead_flag) {
-      if (lookahead >= lookahead_flag)
-        lookahead = 0;
+    if (scan_delay_flag) {
+      if (scan_delay >= scan_delay_flag)
+        scan_delay = 0;
       else if (current_command -> command) {
-        lookahead ++;
+        scan_delay ++;
         *current_command = (struct command) {.command = 0, .count = 1, .value = position};
       }
     }
