@@ -3,8 +3,9 @@
 #include <string.h>
 #include <stdarg.h>
 
-#define COMPRESSION_METHODS 80 /* sum of all values for the methods field in compressors */
+#define COMPRESSION_METHODS 96 /* sum of all values for the methods field in compressors */
 #define MAX_FILE_SIZE 32768
+#define LOOKAHEAD_LIMIT 3072
 
 struct command {
   unsigned command: 3;
@@ -36,6 +37,13 @@ struct command * compress_single_method(const unsigned char *, unsigned short *,
 // merging.c
 struct command * select_command_sequence(struct command **, const unsigned short *, unsigned, unsigned short *);
 struct command * merge_command_sequences(const struct command *, unsigned short, const struct command *, unsigned short, unsigned short *);
+
+// mpcomp.c
+struct command * try_compress_multi_pass(const unsigned char *, const unsigned char *, unsigned short *, unsigned);
+struct command pick_command_for_position(const unsigned char *, const unsigned char *, const unsigned char *, const short *, unsigned short,
+                                         unsigned short, unsigned);
+struct command pick_repetition_for_position(const unsigned char *, unsigned short, unsigned short, unsigned);
+struct command pick_copy_for_position(const unsigned char *, const unsigned char *, const short *, unsigned char, unsigned short, unsigned short, unsigned);
 
 // nullcomp.c
 struct command * store_uncompressed(const unsigned char *, const unsigned char *, unsigned short *, unsigned);
