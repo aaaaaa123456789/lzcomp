@@ -20,6 +20,7 @@ struct compressor {
 struct options {
   const char * input;
   const char * output;
+  unsigned method;
   unsigned char mode;
   unsigned char alignment;
 };
@@ -30,6 +31,7 @@ extern const struct compressor compressors[];
 // main.c
 int main(int, char **);
 struct command * compress(const unsigned char *, unsigned short *);
+struct command * compress_single_method(const unsigned char *, unsigned short *, unsigned);
 
 // merging.c
 struct command * select_command_sequence(struct command **, const unsigned short *, unsigned, unsigned short *);

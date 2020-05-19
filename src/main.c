@@ -4,7 +4,11 @@ int main (int argc, char ** argv) {
   struct options options = get_options(argc, argv);
   unsigned short size;
   unsigned char * file_buffer = read_file_into_buffer(options.input, &size);
-  struct command * compressed = compress(file_buffer, &size);
+  struct command * compressed;
+  if (options.method < COMPRESSION_METHODS)
+    compressed = compress_single_method(file_buffer, &size, options.method);
+  else
+    compressed = compress(file_buffer, &size);
   if (options.mode)
     write_commands_to_textfile(options.output, compressed, size, file_buffer, options.alignment);
   else
@@ -29,5 +33,15 @@ struct command * compress (const unsigned char * data, unsigned short * size) {
   free(bitflipped);
   struct command * result = select_command_sequence(compressed_sequences, lengths, COMPRESSION_METHODS, size);
   for (current = 0; current < COMPRESSION_METHODS; current ++) free(compressed_sequences[current]);
+  return result;
+}
+
+struct command * compress_single_method (const unsigned char * data, unsigned short * size, unsigned method) {
+  unsigned char * bitflipped = malloc(*size);
+  bit_flip(data, *size, bitflipped);
+  const struct compressor * compressor = compressors;
+  while (method >= compressor -> methods) method -= (compressor ++) -> methods;
+  struct command * result = compressor -> function(data, bitflipped, size, method);
+  free(bitflipped);
   return result;
 }

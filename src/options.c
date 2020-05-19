@@ -1,7 +1,7 @@
 #include "proto.h"
 
 struct options get_options (int argc, char ** argv) {
-  struct options result = {.input = NULL, .output = NULL, .mode = 0, .alignment = 0};
+  struct options result = {.input = NULL, .output = NULL, .mode = 0, .alignment = 0, .method = COMPRESSION_METHODS};
   const char * program_name = *argv;
   for (argv ++; *argv; argv ++) {
     if (**argv != '-') break;
@@ -14,6 +14,10 @@ struct options get_options (int argc, char ** argv) {
       result.mode = 0;
     else if (!(strcmp(*argv, "--align") && strncmp(*argv, "-a", 2)))
       result.mode = parse_numeric_option_argument(&argv, 12);
+    else if (!(strcmp(*argv, "--method") && strncmp(*argv, "-m", 2)))
+      result.method = parse_numeric_option_argument(&argv, COMPRESSION_METHODS - 1);
+    else if (!(strcmp(*argv, "--optimize") && strcmp(*argv, "-o")))
+      result.method = COMPRESSION_METHODS;
     else
       error_exit(3, "unknown option: %s", *argv);
   }
