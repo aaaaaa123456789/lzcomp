@@ -21,6 +21,7 @@ struct options {
   const char * input;
   const char * output;
   unsigned char mode;
+  unsigned char alignment;
 };
 
 // global.c
@@ -39,12 +40,13 @@ struct command * store_uncompressed(const unsigned char *, const unsigned char *
 
 // options.c
 struct options get_options(int, char **);
+unsigned parse_numeric_option_argument(char ***, unsigned);
 void usage(const char *);
 
 // output.c
-void write_commands_to_textfile(const char *, const struct command *, unsigned, const unsigned char *);
+void write_commands_to_textfile(const char *, const struct command *, unsigned, const unsigned char *, unsigned char);
 void write_command_to_textfile(FILE *, struct command, const unsigned char *);
-void write_commands_to_file(const char *, const struct command *, unsigned, const unsigned char *);
+void write_commands_to_file(const char *, const struct command *, unsigned, const unsigned char *, unsigned char);
 void write_command_to_file(FILE *, struct command, const unsigned char *);
 
 // packing.c

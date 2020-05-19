@@ -1,10 +1,22 @@
 #include "proto.h"
 
-void write_commands_to_textfile (const char * file, const struct command * commands, unsigned count, const unsigned char * input_stream) {
+void write_commands_to_textfile (const char * file, const struct command * commands, unsigned count, const unsigned char * input_stream,
+                                 unsigned char alignment) {
   FILE * fp = file ? fopen(file, "w") : stdout;
   if (!fp) error_exit(1, "could not open file %s for writing", file);
-  while (count --) write_command_to_textfile(fp, *(commands ++), input_stream);
+  unsigned length = 0;
+  while (count --) {
+    write_command_to_textfile(fp, *commands, input_stream);
+    length += command_size(*(commands ++));
+  }
   if (fputs("\tlzend\n", fp) < 0) error_exit(1, "could not write terminator to compressed output");
+  length = ~length & ((1 << alignment) - 1);
+  if (length --) {
+    int rv = fputs("\tdb 0", fp);
+    while ((rv >= 0) && length --) rv = fputs(", 0", fp);
+    if (rv >= 0) rv = -(putc('\n', fp) == EOF);
+    if (rv < 0) error_exit(1, "could not write padding to compressed output");
+  }
   if (file) fclose(fp);
 }
 
@@ -50,12 +62,17 @@ void write_command_to_textfile (FILE * fp, struct command command, const unsigne
   if (rv < 0) error_exit(1, "could not write command to compressed output");
 }
 
-void write_commands_to_file (const char * file, const struct command * commands, unsigned count, const unsigned char * input_stream) {
+void write_commands_to_file (const char * file, const struct command * commands, unsigned count, const unsigned char * input_stream, unsigned char alignment) {
   FILE * fp = file ? fopen(file, "wb") : stdout;
   if (!fp) error_exit(1, "could not open file %s for writing", file);
-  while (count --) write_command_to_file(fp, *(commands ++), input_stream);
-  unsigned char terminator = -1;
-  if (fwrite(&terminator, 1, 1, fp) != 1) error_exit(1, "could not write terminator to compressed output");
+  unsigned length = 0;
+  while (count --) {
+    write_command_to_file(fp, *commands, input_stream);
+    length += command_size(*(commands ++));
+  }
+  if (putc(-1, fp) == EOF) error_exit(1, "could not write terminator to compressed output");
+  length = ~length & ((1 << alignment) - 1);
+  while (length --) if (putc(0, fp) == EOF) error_exit(1, "could not write padding to compressed output");
   if (file) fclose(fp);
 }
 

@@ -6,9 +6,9 @@ int main (int argc, char ** argv) {
   unsigned char * file_buffer = read_file_into_buffer(options.input, &size);
   struct command * compressed = compress(file_buffer, &size);
   if (options.mode)
-    write_commands_to_textfile(options.output, compressed, size, file_buffer);
+    write_commands_to_textfile(options.output, compressed, size, file_buffer, options.alignment);
   else
-    write_commands_to_file(options.output, compressed, size, file_buffer);
+    write_commands_to_file(options.output, compressed, size, file_buffer, options.alignment);
   free(file_buffer);
   free(compressed);
   return 0;
