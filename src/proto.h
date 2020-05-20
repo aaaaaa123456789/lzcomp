@@ -12,9 +12,9 @@
 #define MULTIPASS_SKIP_THRESHOLD    64
 
 struct command {
-  unsigned command: 3;
-  unsigned count:  12;
-  signed value:    17;
+  unsigned command: 3; // commands 0-6 as per compression spec; command 7 is used as a dummy placeholder
+  unsigned count:  12; // always equals the uncompressed data length
+  signed value:    17; // offset for commands 0 (into source) and 4-6 (into decompressed output); repeated bytes for commands 1-2
 };
 
 struct compressor {
