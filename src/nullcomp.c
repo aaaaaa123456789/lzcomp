@@ -1,7 +1,7 @@
 #include "proto.h"
 
 /*
-   Null compressor: stores data uncompressed, using literal commands only.
+   Null compressor: stores data uncompressed, using literal (0) commands only.
    Methods defined: 2
    Flags values: 0 = split a trailing 33-to-64-byte block at the end into two short blocks; 1 = don't
 */
