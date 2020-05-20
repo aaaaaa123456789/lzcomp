@@ -32,11 +32,11 @@ struct options {
 
 // global.c
 extern const struct compressor compressors[];
+extern const unsigned char bit_flipping_table[];
 
 // main.c
 int main(int, char **);
-struct command * compress(const unsigned char *, unsigned short *);
-struct command * compress_single_method(const unsigned char *, unsigned short *, unsigned);
+struct command * compress(const unsigned char *, unsigned short *, unsigned);
 
 // merging.c
 struct command * select_command_sequence(struct command **, const unsigned short *, unsigned, unsigned short *);
@@ -81,7 +81,6 @@ struct command find_best_repetition(const unsigned char *, unsigned short, unsig
 // util.c
 void error_exit(int, const char *, ...);
 unsigned char * read_file_into_buffer(const char *, unsigned short *);
-void bit_flip(const unsigned char *, unsigned short, unsigned char *);
 struct command pick_best_command(unsigned, struct command, ...);
 int is_better(struct command, struct command);
 short command_size(struct command);

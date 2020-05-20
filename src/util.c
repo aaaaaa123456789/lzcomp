@@ -22,16 +22,6 @@ unsigned char * read_file_into_buffer (const char * file, unsigned short * size)
   return buf;
 }
 
-void bit_flip (const unsigned char * data, unsigned short length, unsigned char * result) {
-  unsigned char new_value, pos;
-  while (length --) {
-    new_value = 0;
-    for (pos = 0; pos < 8; pos ++) new_value |= ((*data >> pos) & 1) << (7 - pos);
-    *(result ++) = new_value;
-    data ++;
-  }
-}
-
 struct command pick_best_command (unsigned count, struct command command, ...) {
   struct command result = command;
   va_list ap;
