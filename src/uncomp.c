@@ -40,7 +40,7 @@ struct command * get_commands_from_file (const unsigned char * data, unsigned sh
       default:
         if (!(remaining --)) goto error;
         if ((current -> value = *(rp ++)) & 128)
-          current -> value = 128 - current -> value;
+          current -> value = 127 - current -> value;
         else {
           if (!(remaining --)) goto error;
           current -> value = (current -> value << 8) | *(rp ++);
