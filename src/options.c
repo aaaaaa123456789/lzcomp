@@ -19,7 +19,7 @@ struct options get_options (int argc, char ** argv) {
     else if (!(strcmp(*argv, "--dump") && strcmp(*argv, "-d")))
       result.mode = 3;
     else if (!(strcmp(*argv, "--align") && strncmp(*argv, "-a", 2)))
-      result.mode = parse_numeric_option_argument(&argv, 12);
+      result.alignment = parse_numeric_option_argument(&argv, 12);
     else if (!(strcmp(*argv, "--method") && strncmp(*argv, "-m", 2)))
       result.method = parse_numeric_option_argument(&argv, COMPRESSION_METHODS - 1);
     else if (!(strcmp(*argv, "--optimize") && strcmp(*argv, "-o")))
