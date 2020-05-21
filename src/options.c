@@ -3,8 +3,10 @@
 struct options get_options (int argc, char ** argv) {
   struct options result = {.input = NULL, .output = NULL, .mode = 0, .alignment = 0, .method = COMPRESSION_METHODS};
   const char * program_name = *argv;
+  if (argc == 1) usage(program_name);
   for (argv ++; *argv; argv ++) {
     if (**argv != '-') break;
+    if (!1[*argv]) break;
     if (!strcmp(*argv, "--")) {
       argv ++;
       break;
@@ -22,12 +24,18 @@ struct options get_options (int argc, char ** argv) {
       result.method = parse_numeric_option_argument(&argv, COMPRESSION_METHODS - 1);
     else if (!(strcmp(*argv, "--optimize") && strcmp(*argv, "-o")))
       result.method = COMPRESSION_METHODS;
+    else if (!(strcmp(*argv, "--help") && strcmp(*argv, "-?")))
+      usage(program_name);
     else
       error_exit(3, "unknown option: %s", *argv);
   }
-  if (!*argv) usage(program_name);
-  result.input = *argv;
-  result.output = argv[1];
+  if (*argv) {
+    if (strcmp(*argv, "-")) result.input = *argv;
+    if (*(++ argv)) {
+      if (argv[1]) error_exit(3, "too many command-line arguments");
+      if (strcmp(*argv, "-")) result.output = *argv;
+    }
+  }
   return result;
 }
 
