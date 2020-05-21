@@ -62,11 +62,24 @@ unsigned parse_numeric_option_argument (char *** alp, unsigned limit) {
 }
 
 void usage (const char * program_name) {
-  // ... (TODO: update for new options)
-  fprintf(stderr, "Usage: %s [<options>] <source file> [<compressed output>]\n\n", program_name);
-  fputs("Options:\n", stderr);
-  fputs("    --text    Output the command stream as text.\n", stderr);
-  fputs("    --binary  Output the command stream as binary data (default).\n", stderr);
-  fputs("    --        End of option list.\n", stderr);
+  fprintf(stderr, "Usage: %s [<options>] [<source file> [<output>]]\n\n", program_name);
+  fputs("Execution mode:\n", stderr);
+  fputs("    -b, --binary      Output the command stream as binary data (default).\n", stderr);
+  fputs("    -t, --text        Output the command stream as text.\n", stderr);
+  fputs("    -u, --uncompress  Process a compressed file and output the original data.\n", stderr);
+  fputs("    -d, --dump        Process a compressed file and dump the command stream as\n", stderr);
+  fputs("                      text (as if compressed with the --text option).\n", stderr);
+  fputs("    -?, --help        Print this help text and exit.\n", stderr);
+  fputs("Compression options:\n", stderr);
+  fputs("    -o, --optimize                 Use the best combination of compression\n", stderr);
+  fputs("                                   methods available (default).\n", stderr);
+  fputs("    -m<number>, --method <number>  Use only one specific compression method.\n", stderr);
+  fprintf(stderr, "                                   Valid method numbers are between 0 and %u.\n", COMPRESSION_METHODS - 1);
+  fputs("    -a<number>, --align <number>   Pad the compressed output with zeros until\n", stderr);
+  fputs("                                   the size has the specified number of low bits\n", stderr);
+  fputs("                                   cleared (default: 0).\n", stderr);
+  fputs("The source and output filenames can be given as - (or omitted) to use standard\n", stderr);
+  fputs("input and output. Use -- to indicate that subsequent arguments are file names,\n", stderr);
+  fputs("not options.\n", stderr);
   exit(3);
 }
