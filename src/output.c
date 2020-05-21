@@ -20,6 +20,22 @@ void write_commands_to_textfile (const char * file, const struct command * comma
   if (file) fclose(fp);
 }
 
+void write_commands_and_padding_to_textfile (const char * file, const struct command * commands, unsigned count, const unsigned char * input_stream,
+                                             unsigned padding_offset, unsigned padding_size) {
+  FILE * fp = file ? fopen(file, "w") : stdout;
+  if (!fp) error_exit(1, "could not open file %s for writing", file);
+  while (count --) write_command_to_textfile(fp, *(commands ++), input_stream);
+  if (fputs("\tlzend\n", fp) < 0) error_exit(1, "could not write terminator to compressed output");
+  if (padding_size) {
+    input_stream += padding_offset;
+    int rv = fprintf(fp, "\t db $%02hhx", *(input_stream ++));
+    while ((rv >= 0) && (-- padding_size)) rv = fprintf(fp, ", $%02hhx", *(input_stream ++));
+    if (rv >= 0) rv = -(putc('\n', fp) == EOF);
+    if (rv < 0) error_exit(1, "could not write padding to compressed output");
+  }
+  if (file) fclose(fp);
+}
+
 void write_command_to_textfile (FILE * fp, struct command command, const unsigned char * input_stream) {
   if ((!command.count) || (command.count > MAX_COMMAND_COUNT)) error_exit(2, "invalid command in output stream");
   int rv, pos;
@@ -107,4 +123,16 @@ void write_command_to_file (FILE * fp, struct command command, const unsigned ch
   if (command.command) return;
   command.count ++;
   if (fwrite(input_stream + command.value, 1, command.count, fp) != command.count) error_exit(1, "could not write data to compressed output");
+}
+
+void write_raw_data_to_file (const char * file, const void * data, unsigned length) {
+  FILE * fp = file ? fopen(file, "w") : stdout;
+  if (!fp) error_exit(1, "could not open file %s for writing", file);
+  while (length) {
+    unsigned rv = fwrite(data, 1, length, fp);
+    if (!rv) error_exit(1, "could not write raw data to output");
+    data = (const char *) data + rv;
+    length -= rv;
+  }
+  if (file) fclose(fp);
 }

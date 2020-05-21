@@ -26,8 +26,8 @@ struct options {
   const char * input;
   const char * output;
   unsigned method;
-  unsigned char mode;
-  unsigned char alignment;
+  unsigned char mode; // 0: compress, 1: compress to text, 2: uncompress, 3: dump commands as text
+  unsigned char alignment; // 1 << value
 };
 
 // global.c
@@ -59,9 +59,11 @@ void usage(const char *);
 
 // output.c
 void write_commands_to_textfile(const char *, const struct command *, unsigned, const unsigned char *, unsigned char);
+void write_commands_and_padding_to_textfile(const char *, const struct command *, unsigned, const unsigned char *, unsigned, unsigned);
 void write_command_to_textfile(FILE *, struct command, const unsigned char *);
 void write_commands_to_file(const char *, const struct command *, unsigned, const unsigned char *, unsigned char);
 void write_command_to_file(FILE *, struct command, const unsigned char *);
+void write_raw_data_to_file(const char *, const void *, unsigned);
 
 // packing.c
 void optimize(struct command *, unsigned short);
@@ -77,6 +79,10 @@ struct command find_best_copy(const unsigned char *, unsigned short, unsigned sh
 unsigned short scan_forwards(const unsigned char *, unsigned short, const unsigned char *, unsigned short, short *);
 unsigned short scan_backwards(const unsigned char *, unsigned short, unsigned short, short *);
 struct command find_best_repetition(const unsigned char *, unsigned short, unsigned short);
+
+// uncomp.c
+struct command * get_commands_from_file(const unsigned char *, unsigned short * restrict, unsigned short * restrict);
+unsigned char * get_uncompressed_data(const struct command *, const unsigned char *, unsigned short *);
 
 // util.c
 void error_exit(int, const char *, ...);

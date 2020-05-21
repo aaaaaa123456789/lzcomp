@@ -12,6 +12,10 @@ struct options get_options (int argc, char ** argv) {
       result.mode = 1;
     else if (!(strcmp(*argv, "--binary") && strcmp(*argv, "-b")))
       result.mode = 0;
+    else if (!(strcmp(*argv, "--uncompress") && strcmp(*argv, "-u")))
+      result.mode = 2;
+    else if (!(strcmp(*argv, "--dump") && strcmp(*argv, "-d")))
+      result.mode = 3;
     else if (!(strcmp(*argv, "--align") && strncmp(*argv, "-a", 2)))
       result.mode = parse_numeric_option_argument(&argv, 12);
     else if (!(strcmp(*argv, "--method") && strncmp(*argv, "-m", 2)))
