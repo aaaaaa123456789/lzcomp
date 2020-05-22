@@ -6,8 +6,8 @@
    Methods defined: 16
    Flags values: the flags are a bitfield; each bit triggers some alternate behavior if set:
      1: always emit a literal command (0) for the first byte of the file
-     2: when reducing a two-byte repetition (2) command in the overlap elimination pass, reduce it to contain a whole
-        number of repetitions (i.e., an even count)
+     2: when reducing a two-byte repetition (2) command in the overlap elimination pass, don't force it to contain a
+        whole number of repetitions (i.e., an even count)
      4: don't emit copy commands (4, 5, 6) with a count of 3
      8: don't emit single-byte repetition (1) commands
 */
