@@ -4,9 +4,9 @@ void optimize (struct command * commands, unsigned short count) {
   while (count && (commands -> command == 7)) commands ++, count --;
   if (count < 2) return;
   struct command * end = commands + count;
-  struct command * next = commands + 1;
-  while (next < end) {
-    if (next -> command == 7) goto skip;
+  struct command * next;
+  for (next = commands + 1; next < end; next ++) {
+    if (next -> command == 7) continue;
     if (
         !(commands -> command) &&
         (command_size(*next) == next -> count) &&
@@ -15,7 +15,7 @@ void optimize (struct command * commands, unsigned short count) {
        ) {
       commands -> count += next -> count;
       next -> command = 7;
-      goto skip;
+      continue;
     }
     if (next -> command != commands -> command) goto accept;
     switch (commands -> command) {
@@ -23,7 +23,7 @@ void optimize (struct command * commands, unsigned short count) {
         if ((commands -> value + commands -> count) != next -> value) break;
         commands -> count += next -> count;
         next -> command = 7;
-        if (commands -> count <= MAX_COMMAND_COUNT) goto skip;
+        if (commands -> count <= MAX_COMMAND_COUNT) continue;
         next -> command = 0;
         next -> value = commands -> value + MAX_COMMAND_COUNT;
         next -> count = commands -> count - MAX_COMMAND_COUNT;
@@ -35,7 +35,7 @@ void optimize (struct command * commands, unsigned short count) {
         if ((commands -> count + next -> count) <= MAX_COMMAND_COUNT) {
           commands -> count += next -> count;
           next -> command = 7;
-          goto skip;
+          continue;
         }
         next -> count = (commands -> count + next -> count) - MAX_COMMAND_COUNT;
         commands -> count = MAX_COMMAND_COUNT;
@@ -43,8 +43,6 @@ void optimize (struct command * commands, unsigned short count) {
     }
     accept:
     commands = next;
-    skip:
-    next ++;
   }
 }
 
