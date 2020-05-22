@@ -9,7 +9,6 @@ struct command * get_commands_from_file (const unsigned char * data, unsigned sh
     if (!(remaining --)) goto error;
     current -> command = *rp >> 5;
     current -> count = *(rp ++) & 31;
-    remaining --;
     if (current -> command == 7) {
       current -> command = current -> count >> 2;
       current -> count = (current -> count & 3) << 8;
