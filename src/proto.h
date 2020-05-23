@@ -19,13 +19,14 @@ struct command {
 
 struct compressor {
   unsigned methods;
+  const char * name;
   struct command * (* function) (const unsigned char *, const unsigned char *, unsigned short *, unsigned);
 };
 
 struct options {
   const char * input;
   const char * output;
-  unsigned method;
+  unsigned method; // method to use, or >= COMPRESSION_METHODS to try them all
   unsigned char mode; // 0: compress, 1: compress to text, 2: uncompress, 3: dump commands as text
   unsigned char alignment; // 1 << value
 };
@@ -33,6 +34,7 @@ struct options {
 // global.c
 extern const struct compressor compressors[];
 extern const unsigned char bit_flipping_table[];
+extern char option_name_buffer[];
 
 // main.c
 int main(int, char **);
@@ -55,6 +57,8 @@ struct command * store_uncompressed(const unsigned char *, const unsigned char *
 // options.c
 struct options get_options(int, char **);
 unsigned parse_numeric_option_argument(char ***, unsigned);
+int parse_compressor_option_argument(char ***);
+const char * get_argument_for_option(char ***, const char **);
 void usage(const char *);
 
 // output.c

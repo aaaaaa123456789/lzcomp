@@ -3,6 +3,7 @@
 struct options get_options (int argc, char ** argv) {
   struct options result = {.input = NULL, .output = NULL, .mode = 0, .alignment = 0, .method = COMPRESSION_METHODS};
   const char * program_name = *argv;
+  int compressor = -1;
   if (argc == 1) usage(program_name);
   for (argv ++; *argv; argv ++) {
     if (**argv != '-') break;
@@ -22,12 +23,21 @@ struct options get_options (int argc, char ** argv) {
       result.alignment = parse_numeric_option_argument(&argv, 12);
     else if (!(strcmp(*argv, "--method") && strncmp(*argv, "-m", 2)))
       result.method = parse_numeric_option_argument(&argv, COMPRESSION_METHODS - 1);
-    else if (!(strcmp(*argv, "--optimize") && strcmp(*argv, "-o")))
+    else if (!(strcmp(*argv, "--compressor") && strncmp(*argv, "-c", 2)))
+      compressor = parse_compressor_option_argument(&argv);
+    else if (!(strcmp(*argv, "--optimize") && strcmp(*argv, "-o"))) {
       result.method = COMPRESSION_METHODS;
-    else if (!(strcmp(*argv, "--help") && strcmp(*argv, "-?")))
+      compressor = -1;
+    } else if (!(strcmp(*argv, "--help") && strcmp(*argv, "-?")))
       usage(program_name);
     else
       error_exit(3, "unknown option: %s", *argv);
+  }
+  if (compressor >= 0) {
+    if (result.method >= COMPRESSION_METHODS) result.method = 0;
+    if (result.method >= compressors[compressor].methods)
+      error_exit(3, "method for the %s compressor must be between 0 and %u", compressors[compressor].name, compressors[compressor].methods - 1);
+    while (compressor > 0) result.method += compressors[-- compressor].methods;
   }
   if (*argv) {
     if (strcmp(*argv, "-")) result.input = *argv;
@@ -40,24 +50,45 @@ struct options get_options (int argc, char ** argv) {
 }
 
 unsigned parse_numeric_option_argument (char *** alp, unsigned limit) {
-  // alp: argument list pointer (i.e., address of the current value of argv after indexing)
-  // will point at the last consumed argument on exit (since the caller will probably increment it once more)
   const char * option;
-  const char * value;
-  char option_buffer[] = "-?";
-  if (1[**alp] == '-') {
-    option = *((*alp) ++);
-    value = **alp;
-  } else {
-    option_buffer[1] = 1[**alp];
-    option = option_buffer;
-    value = **alp + 2;
-  }
-  if (!(value && *value)) error_exit(3, "option %s requires an argument", option);
+  const char * value = get_argument_for_option(alp, &option);
   char * error;
   unsigned long result = strtoul(value, &error, 10);
   if (*error) error_exit(3, "invalid argument to option %s", option);
   if (result > limit) error_exit(3, "argument to option %s must be between 0 and %u", option, limit);
+  return result;
+}
+
+int parse_compressor_option_argument (char *** alp) {
+  const char * name = get_argument_for_option(alp, NULL);
+  if (!strcmp(name, "*")) return -1;
+  int result = -1;
+  unsigned length = strlen(name);
+  const struct compressor * compressor;
+  for (compressor = compressors; compressor -> name; compressor ++) {
+    if (strncmp(name, compressor -> name, length)) continue;
+    if (result >= 0) error_exit(3, "ambiguous compressor prefix: %s", name);
+    result = compressor - compressors;
+  }
+  if (result < 0) error_exit(3, "unknown compressor: %s", name);
+  return result;
+}
+
+const char * get_argument_for_option (char *** alp, const char ** option_name) {
+  // alp: argument list pointer (i.e., address of the current value of argv after indexing)
+  // will point at the last consumed argument on exit (since the caller will probably increment it once more)
+  const char * option;
+  const char * result;
+  if (1[**alp] == '-') {
+    option = *((*alp) ++);
+    result = **alp;
+  } else {
+    option_name_buffer[1] = 1[**alp];
+    option = option_name_buffer;
+    result = **alp + 2;
+  }
+  if (!(result && *result)) error_exit(3, "option %s requires an argument", option);
+  if (option_name) *option_name = option;
   return result;
 }
 
@@ -75,6 +106,10 @@ void usage (const char * program_name) {
   fputs("                                   methods available (default).\n", stderr);
   fputs("    -m<number>, --method <number>  Use only one specific compression method.\n", stderr);
   fprintf(stderr, "                                   Valid method numbers are between 0 and %u.\n", COMPRESSION_METHODS - 1);
+  fputs("    -c<name>, --compressor <name>  Use the specified compressor: the method\n", stderr);
+  fputs("                                   number will be relative to that compressor.\n", stderr);
+  fputs("                                   Any prefix of the compressor name may be\n", stderr);
+  fputs("                                   specified. Use * to indicate any compressor.\n", stderr);
   fputs("    -a<number>, --align <number>   Pad the compressed output with zeros until\n", stderr);
   fputs("                                   the size has the specified number of low bits\n", stderr);
   fputs("                                   cleared (default: 0).\n", stderr);
