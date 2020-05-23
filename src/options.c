@@ -30,6 +30,8 @@ struct options get_options (int argc, char ** argv) {
       compressor = -1;
     } else if (!(strcmp(*argv, "--help") && strcmp(*argv, "-?")))
       usage(program_name);
+    else if (!(strcmp(*argv, "--list") && strcmp(*argv, "-l")))
+      list_compressors();
     else
       error_exit(3, "unknown option: %s", *argv);
   }
@@ -92,7 +94,7 @@ const char * get_argument_for_option (char *** alp, const char ** option_name) {
   return result;
 }
 
-void usage (const char * program_name) {
+noreturn usage (const char * program_name) {
   fprintf(stderr, "Usage: %s [<options>] [<source file> [<output>]]\n\n", program_name);
   fputs("Execution mode:\n", stderr);
   fputs("    -b, --binary      Output the command stream as binary data (default).\n", stderr);
@@ -100,6 +102,7 @@ void usage (const char * program_name) {
   fputs("    -u, --uncompress  Process a compressed file and output the original data.\n", stderr);
   fputs("    -d, --dump        Process a compressed file and dump the command stream as\n", stderr);
   fputs("                      text (as if compressed with the --text option).\n", stderr);
+  fputs("    -l, --list        List compressors and their method numbers.\n", stderr);
   fputs("    -?, --help        Print this help text and exit.\n", stderr);
   fputs("Compression options:\n", stderr);
   fputs("    -o, --optimize                 Use the best combination of compression\n", stderr);
@@ -114,7 +117,25 @@ void usage (const char * program_name) {
   fputs("                                   the size has the specified number of low bits\n", stderr);
   fputs("                                   cleared (default: 0).\n", stderr);
   fputs("The source and output filenames can be given as - (or omitted) to use standard\n", stderr);
-  fputs("input and output. Use -- to indicate that subsequent arguments are file names,\n", stderr);
-  fputs("not options.\n", stderr);
+  fputs("input and output. Use -- to indicate that subsequent arguments are file names.\n", stderr);
+  exit(3);
+}
+
+noreturn list_compressors (void) {
+  const struct compressor * compressor;
+  unsigned current, length = 10;
+  for (compressor = compressors; compressor -> name; compressor ++) if ((current = strlen(compressor -> name)) > length) length = current;
+  fprintf(stderr, "%-*s  Offset  Methods\n", length, "Compressor");
+  for (current = 0; current < length; current ++) putc('-', stderr);
+  fputs("  ------  -------\n", stderr);
+  current = 0;
+  for (compressor = compressors; compressor -> name; compressor ++) {
+    fprintf(stderr, "%-*s  %6u  %7u\n", length, compressor -> name, current, compressor -> methods);
+    current += compressor -> methods;
+  }
+  putc('\n', stderr);
+  fputs("Note: the offset indicates the compressor's lowest method number when the\n", stderr);
+  fputs("--compressor option is not given. When that option is used, every compressor's\n", stderr);
+  fputs("methods are numbered from zero.\n", stderr);
   exit(3);
 }
