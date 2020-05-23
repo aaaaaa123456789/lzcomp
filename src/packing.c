@@ -17,31 +17,29 @@ void optimize (struct command * commands, unsigned short count) {
       next -> command = 7;
       continue;
     }
-    if (next -> command != commands -> command) goto accept;
-    switch (commands -> command) {
-      case 0:
-        if ((commands -> value + commands -> count) != next -> value) break;
-        commands -> count += next -> count;
-        next -> command = 7;
-        if (commands -> count <= MAX_COMMAND_COUNT) continue;
-        next -> command = 0;
-        next -> value = commands -> value + MAX_COMMAND_COUNT;
-        next -> count = commands -> count - MAX_COMMAND_COUNT;
-        commands -> count = MAX_COMMAND_COUNT;
-        break;
-      case 1:
-        if (commands -> value != next -> value) break;
-      case 3:
-        if ((commands -> count + next -> count) <= MAX_COMMAND_COUNT) {
+    if (next -> command == commands -> command)
+      switch (commands -> command) {
+        case 0:
+          if ((commands -> value + commands -> count) != next -> value) break;
           commands -> count += next -> count;
           next -> command = 7;
-          continue;
-        }
-        next -> count = (commands -> count + next -> count) - MAX_COMMAND_COUNT;
-        commands -> count = MAX_COMMAND_COUNT;
-        break;
-    }
-    accept:
+          if (commands -> count <= MAX_COMMAND_COUNT) continue;
+          next -> command = 0;
+          next -> value = commands -> value + MAX_COMMAND_COUNT;
+          next -> count = commands -> count - MAX_COMMAND_COUNT;
+          commands -> count = MAX_COMMAND_COUNT;
+          break;
+        case 1:
+          if (commands -> value != next -> value) break;
+        case 3:
+          if ((commands -> count + next -> count) <= MAX_COMMAND_COUNT) {
+            commands -> count += next -> count;
+            next -> command = 7;
+            continue;
+          }
+          next -> count = (commands -> count + next -> count) - MAX_COMMAND_COUNT;
+          commands -> count = MAX_COMMAND_COUNT;
+      }
     commands = next;
   }
 }
