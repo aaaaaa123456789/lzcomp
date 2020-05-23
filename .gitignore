@@ -1,0 +1,5 @@
+*.o
+lzcomp
+lzcomp.exe
+lzdump
+lzdump.exe
