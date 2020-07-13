@@ -108,7 +108,7 @@ unsigned short scan_backwards (const unsigned char * data, unsigned short limit,
     for (current_length = 1; (current_length <= position) && (current_length < limit) &&
                              (data[position - current_length] == data[real_position + current_length]); current_length ++);
     if (current_length > MAX_COMMAND_COUNT) current_length = MAX_COMMAND_COUNT;
-    if (current_length < best_length) {
+    if (current_length >= best_length) {
       best_match = position;
       best_length = current_length;
     }
