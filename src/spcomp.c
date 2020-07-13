@@ -39,14 +39,13 @@ struct command * try_compress_single_pass (const unsigned char * data, const uns
     if ((flags & 2) && (command_size(*current_command) == current_command -> count))
       if (previous_data && (previous_data != SHORT_COMMAND_COUNT) && (previous_data != MAX_COMMAND_COUNT))
         *current_command = (struct command) {.command = 0, .count = 1, .value = position};
-    if (scan_delay_flag) {
+    if (scan_delay_flag)
       if (scan_delay >= scan_delay_flag)
         scan_delay = 0;
       else if (current_command -> command) {
         scan_delay ++;
         *current_command = (struct command) {.command = 0, .count = 1, .value = position};
       }
-    }
     if (current_command -> command)
       previous_data = 0;
     else
