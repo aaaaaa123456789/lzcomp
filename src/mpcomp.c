@@ -61,8 +61,7 @@ struct command pick_command_for_pass (const unsigned char * data, const unsigned
   unsigned char p;
   for (p = 0; p < 3; p ++) {
     struct command temp = pick_copy_for_pass(data, p[(const unsigned char * []) {data, flipped, reversed}], sources, p + 4, length, position, flags);
-    if (temp.command == 7) continue;
-    if (temp.count > result.count) result = temp;
+    if ((temp.command != 7) && (temp.count > result.count)) result = temp;
   }
   if ((result.command >= 4) && (result.value >= (position - LOOKBACK_LIMIT))) result.value -= position;
   return result;
@@ -105,8 +104,7 @@ struct command pick_copy_for_pass (const unsigned char * data, const unsigned ch
     for (count = 4; (count < (length - position)) && (count < (length - refpos)); count ++) if (data[position + count] != current[count]) break;
     if (count > (length - refpos)) count = length - refpos;
     if (count > (length - position)) count = length - position;
-    if (result.count > count) continue;
-    result = (struct command) {.command = command_type, .count = count, .value = sources[-1]};
+    if (result.count <= count) result = (struct command) {.command = command_type, .count = count, .value = sources[-1]};
   }
   return result;
 }

@@ -83,11 +83,12 @@ unsigned short scan_forwards (const unsigned char * target, unsigned short limit
   unsigned short position;
   for (position = 0; position < real_position; position ++) {
     if (source[position] != *target) continue;
-    for (current_length = 0; (current_length < limit) && (source[position + current_length] == target[current_length]); current_length ++);
+    for (current_length = 1; (current_length < limit) && (source[position + current_length] == target[current_length]); current_length ++);
     if (current_length > MAX_COMMAND_COUNT) current_length = MAX_COMMAND_COUNT;
-    if (current_length < best_length) continue;
-    best_match = position;
-    best_length = current_length;
+    if (current_length >= best_length) {
+      best_match = position;
+      best_length = current_length;
+    }
   }
   if (!best_length) return 0;
   if ((best_match + LOOKBACK_LIMIT) >= real_position)
@@ -104,12 +105,13 @@ unsigned short scan_backwards (const unsigned char * data, unsigned short limit,
   unsigned short position;
   for (position = 0; position < real_position; position ++) {
     if (data[position] != data[real_position]) continue;
-    for (current_length = 0; (current_length <= position) && (current_length < limit) &&
+    for (current_length = 1; (current_length <= position) && (current_length < limit) &&
                              (data[position - current_length] == data[real_position + current_length]); current_length ++);
     if (current_length > MAX_COMMAND_COUNT) current_length = MAX_COMMAND_COUNT;
-    if (current_length < best_length) continue;
-    best_match = position;
-    best_length = current_length;
+    if (current_length < best_length) {
+      best_match = position;
+      best_length = current_length;
+    }
   }
   if (!best_length) return 0;
   if ((best_match + LOOKBACK_LIMIT) >= real_position)
